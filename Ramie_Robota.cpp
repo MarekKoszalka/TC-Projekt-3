@@ -4,18 +4,20 @@
 #include "Ramie_Robota.h"
 #include "math.h"
 #include <string>
+#include <ctime>
 
 using namespace std;
 
 #define MAX_LOADSTRING		100/*----------------------------------------------------------------------------------------------STALE---------------------*/
 #define PI					3.14159265
 #define ARM1				350
-#define ARM2				300
+#define ARM2				250
 #define LOWLEVEL			400
 #define TMR_1				1
-#define ARM_SPEED			1
+#define ARM_SPEED			0.5
 #define BOX_WIDE			30
 #define BOX_HIGH			50
+#define RAIL_WIDTH			5
 
 // Global Variables:
 HINSTANCE hInst;								// current instance
@@ -27,6 +29,10 @@ INT value;
 //buttons
 HWND hwndButton;
 
+int stage;
+int vertRail;
+int horizontalDirect;
+int horizontalRail;
 int which_one;
 int x2,x3;
 int y2,y3;
@@ -44,40 +50,45 @@ BOOL				InitInstance(HINSTANCE, int);
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 
-void WriteWeightOfBox(int i, Graphics graphics, FontFamily fontFamily, SolidBrush  solidBrush)
+void WriteWeightOfBox(int i,HDC hdc)
 {
-	Font        font(&fontFamily, 12, FontStyleRegular, UnitPixel);
+	FontFamily  fontFamily(L"Times New Roman");
+	Font        fontW(&fontFamily, 12, FontStyleRegular, UnitPixel);
+	SolidBrush  solidBrush(Color(255, 0, 0, 255));
 
-	PointF pointF[4];
-	for(int i=0; i<=4; i++)
+	PointF pointFW;
+
+	pointFW.X = ((float)*wsk_rx[i]);
+	pointFW.Y = ((float)*wsk_ry[i]);
+
+	Graphics graphics(hdc);
+		
+	switch(waga[i])
 	{
-		pointF[i].X = ((float)*wsk_rx[i]);
-		pointF[i].Y = ((float)*wsk_ry[i]);
-
-		switch(waga[i])
-		{
-		case 0: 
-			graphics.DrawString(L"5kg", -1, &font, pointF[i], &solidBrush);
-			break;
-		case 1:
-			graphics.DrawString(L"10kg", -1, &font, pointF[i], &solidBrush);
-			break;
-		case 2:
-			graphics.DrawString(L"15kg", -1, &font, pointF[i], &solidBrush);
-			break;
-		case 3:
-			graphics.DrawString(L"20kg", -1, &font, pointF[i], &solidBrush);
-		default:
-			graphics.DrawString(L"Error!", -1, &font, pointF[i], &solidBrush);
-			break;
-		}
+	case 0: 
+		graphics.DrawString(L"5kg", -1, &fontW, pointFW, &solidBrush);
+		break;
+	case 1:
+		graphics.DrawString(L"10kg", -1, &fontW, pointFW, &solidBrush);
+		break;
+	case 2:
+		graphics.DrawString(L"15kg", -1, &fontW, pointFW, &solidBrush);
+		break;
+	case 3:
+		graphics.DrawString(L"20kg", -1, &fontW, pointFW, &solidBrush);
+		break;
+	default:
+		graphics.DrawString(L"Error!", -1, &fontW, pointFW, &solidBrush);
+		break;
 	}
 }
 
-int InWhichBoxArmIs(void){ /*--------------------------------------------------------------------------------------IN WHICH BOX ARM IS-------------------*/
+
+int InWhichBoxArmIs(void)/*--------------------------------------------------------------------------------------IN WHICH BOX ARM IS-------------------*/
+{ 
 	bool czy_w_boxie = false;
 
-	for(int i=0; i<4; i++)
+	for(int i=0; i<=3; i++)
 	{
 		if(x3>=*wsk_rx[i] && x3<=(*wsk_rx[i]+BOX_WIDE) && y3 >= *wsk_ry[i] && y3 <= (*wsk_ry[i]+BOX_HIGH))
 		{
@@ -91,17 +102,78 @@ int InWhichBoxArmIs(void){ /*---------------------------------------------------
 	}
 }
 
+void HorizontalShifting(int Xshift, int Direction)
+{
+	if(!(x3 <= Xshift + RAIL_WIDTH && x3 >= Xshift -RAIL_WIDTH))
+	{
+		if((y3 <= (horizontalRail + RAIL_WIDTH))&&(y3 >= (horizontalRail - RAIL_WIDTH)))
+		{
+			degrees1 -= Direction*ARM_SPEED;
+		}else
+		{
+			if(y3 > horizontalRail)
+			{
+						degrees2 += ARM_SPEED;
+			
+				}else
+				{
+						degrees2 -= ARM_SPEED;
+			}
+		}
+	}
+}
+
+
+void DownShifting(int Yshift, int vertRail){
+	if(y3 <= LOWLEVEL- Yshift)
+	{
+		if((x3 <= (vertRail + RAIL_WIDTH))&&(x3 >= (vertRail - RAIL_WIDTH)))
+		{
+			degrees1 -= ARM_SPEED;
+		}else
+		{
+			if(x3 > vertRail)
+			{
+						degrees2 -= ARM_SPEED;
+			
+				}else
+				{
+						degrees2 += ARM_SPEED;
+			}
+		}
+	}
+};
+
+
+void Catch()
+{
+	which_one= InWhichBoxArmIs();
+	wsk_rx[which_one]= &x3;		
+	wsk_ry[which_one]= &y3;
+}
+
+void PutDown()
+{
+	rx[which_one]= *wsk_rx[which_one];
+	ry[which_one]= *wsk_ry[which_one];
+	wsk_rx[which_one]= &rx[which_one];
+	wsk_ry[which_one]= &ry[which_one];
+}
+
+
 
 
 void OnPaint(HDC hdc)/*-----------------------------------------------------------------------------------------------FUNKCJA RYSUJACA-------------------*/
 {
 
-
 	x2= (int)ARM1*sin(degrees1*PI / 180);
 	y2= LOWLEVEL+(int)ARM1*cos(degrees1*PI / 180);
 	x3= (int)(ARM2*sin((degrees1+degrees2)*PI / 180)+ARM1*sin(degrees1*PI / 180));
 	y3= (int)(ARM2*cos((degrees1+degrees2)*PI/180)+LOWLEVEL+ARM1*cos(degrees1*PI / 180));
-	
+
+	//HorizontalShifting(	100, -1);
+	DownShifting(50, 200);
+
 	FontFamily  fontFamily(L"Times New Roman");
 	Font        font(&fontFamily, 24, FontStyleRegular, UnitPixel);
 	PointF      pointF(30.0f, 10.0f);
@@ -140,10 +212,8 @@ void OnPaint(HDC hdc)/*---------------------------------------------------------
 	
 	for(int i=0; i<=3; i++){
 		graphics.DrawRectangle(&blackpen,*wsk_rx[i],*wsk_ry[i],BOX_WIDE,BOX_HIGH);
-		
-
+		WriteWeightOfBox(i, hdc);
 	}
-
 }
 
 
@@ -167,6 +237,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
  	// TODO: Place code here.
 	MSG msg;
 	HACCEL hAccelTable;
+	srand(time(NULL));
 	/*-------------------------------------------------------------------------------------------ZMIENNE--------------------------WARTOSCI POCZATKOWE-----*/
 	for(int i= 0; i<=3; i++)
 	{
@@ -176,10 +247,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 		wsk_ry[i]= &ry[i];
 		waga[i]= rand()% 4;
 	}
-	
+
+	horizontalRail= LOWLEVEL -120;
 	value= 10;
-	degrees1= 125.0;
-	degrees2= -50.0;
+	degrees1= 170.0;
+	degrees2= -90.0;
 
 	GdiplusStartupInput gdiplusStartupInput;
 	ULONG_PTR           gdiplusToken;
