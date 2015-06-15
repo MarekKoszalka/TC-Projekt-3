@@ -14,7 +14,7 @@ using namespace std;
 #define ARM2				250
 #define LOWLEVEL			400
 #define TMR_1				1
-#define ARM_SPEED			0.5
+#define ARM_SPEED			0.8
 #define BOX_WIDE			30
 #define BOX_HIGH			50
 #define RAIL_WIDTH			5
@@ -28,10 +28,9 @@ INT value;
 
 //buttons
 HWND hwndButton;
-
+/*----------------------------------------------------DEFINICJE ZMIENNYCH---------------------------------------*/
 int stage;
 int vertRail;
-int horizontalDirect;
 int horizontalRail;
 int which_one;
 int x2,x3;
@@ -43,6 +42,7 @@ int* wsk_ry[4];
 int waga[4];
 float degrees1;
 float degrees2;
+int sortBoxByWeight[4];
 
 // Forward declarations of functions included in this code module:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
@@ -114,18 +114,17 @@ void HorizontalShifting(int Xshift, int Direction)
 			if(y3 > horizontalRail)
 			{
 						degrees2 += ARM_SPEED;
-			
 				}else
 				{
 						degrees2 -= ARM_SPEED;
 			}
 		}
-	}
+	}else stage++;
 }
 
 
 void DownShifting(int Yshift, int vertRail){
-	if(y3 <= LOWLEVEL- Yshift)
+	if(y3 <= Yshift)
 	{
 		if((x3 <= (vertRail + RAIL_WIDTH))&&(x3 >= (vertRail - RAIL_WIDTH)))
 		{
@@ -135,29 +134,30 @@ void DownShifting(int Yshift, int vertRail){
 			if(x3 > vertRail)
 			{
 						degrees2 -= ARM_SPEED;
-			
 				}else
 				{
 						degrees2 += ARM_SPEED;
 			}
 		}
-	}
+	}else stage++;
 };
 
 
-void Catch()
+void Catch(void)
 {
 	which_one= InWhichBoxArmIs();
 	wsk_rx[which_one]= &x3;		
 	wsk_ry[which_one]= &y3;
+	stage++;
 }
 
-void PutDown()
+void PutDown(void)
 {
 	rx[which_one]= *wsk_rx[which_one];
 	ry[which_one]= *wsk_ry[which_one];
 	wsk_rx[which_one]= &rx[which_one];
 	wsk_ry[which_one]= &ry[which_one];
+	stage++;
 }
 
 
@@ -171,8 +171,91 @@ void OnPaint(HDC hdc)/*---------------------------------------------------------
 	x3= (int)(ARM2*sin((degrees1+degrees2)*PI / 180)+ARM1*sin(degrees1*PI / 180));
 	y3= (int)(ARM2*cos((degrees1+degrees2)*PI/180)+LOWLEVEL+ARM1*cos(degrees1*PI / 180));
 
-	//HorizontalShifting(	100, -1);
-	DownShifting(50, 200);
+	int zabezpieczenie= 5;
+		//rx[i]=400+ i*(BOX_WIDE+10);
+		//ry[i]=LOWLEVEL - BOX_HIGH
+		//sortBoxByWeight[i]
+
+	switch(stage)   //-------------------------------------------------------------------PRACA AUTOMATYCZNA----------------*/
+	{
+		case 1:
+			HorizontalShifting(	rx[sortBoxByWeight[0]]+zabezpieczenie, 1);
+			break;
+		case 2:
+			DownShifting(ry[sortBoxByWeight[0]]+zabezpieczenie, rx[sortBoxByWeight[0]]+zabezpieczenie);
+			break;
+		case 3:
+			Catch();
+			break;
+		case 4:
+			HorizontalShifting(	180+zabezpieczenie, -1);
+			break;
+		case 5:
+			DownShifting(LOWLEVEL-55, 180+zabezpieczenie);
+			break;
+		case 6: PutDown();
+			break;
+		case 7:	
+			HorizontalShifting(	rx[sortBoxByWeight[1]]+zabezpieczenie, 1);
+			break;
+		case 8: 
+			DownShifting(ry[sortBoxByWeight[1]]+zabezpieczenie, rx[sortBoxByWeight[1]]+zabezpieczenie);
+			break;
+		case 9:
+			Catch();
+			break;
+		case 10:
+			HorizontalShifting(	220+zabezpieczenie, -1);
+			break;
+		case 11:
+			DownShifting(LOWLEVEL-55, 220+zabezpieczenie);
+			break;
+		case 12:
+			PutDown();
+			break;
+		case 13:
+			HorizontalShifting(	rx[sortBoxByWeight[2]]+zabezpieczenie, 1);
+			break;
+		case 14:
+			DownShifting(ry[sortBoxByWeight[2]]+zabezpieczenie, rx[sortBoxByWeight[2]]+zabezpieczenie);
+			break;
+		case 15:
+			Catch();
+			break;
+		case 16:
+			HorizontalShifting(	260+zabezpieczenie, -1);
+			break;
+		case 17:
+			DownShifting(LOWLEVEL-55, 260+zabezpieczenie);
+			break;
+		case 18:
+			PutDown();
+			break;
+		case 19:
+			HorizontalShifting(	rx[sortBoxByWeight[3]]+zabezpieczenie, 1);
+			break;
+		case 20:
+			DownShifting(ry[sortBoxByWeight[3]]+zabezpieczenie, rx[sortBoxByWeight[3]]+zabezpieczenie);
+			break;
+		case 21:
+			Catch();
+			break;
+		case 22:
+			HorizontalShifting(	300+zabezpieczenie, -1);
+			break;
+		case 23:
+			DownShifting(LOWLEVEL-55, 300+zabezpieczenie);
+			break;
+		case 24:
+			PutDown();
+			break;
+		case 25:
+			HorizontalShifting(	400, 1);
+		default:
+			break;
+
+	}
+	
 
 	FontFamily  fontFamily(L"Times New Roman");
 	Font        font(&fontFamily, 24, FontStyleRegular, UnitPixel);
@@ -199,7 +282,7 @@ void OnPaint(HDC hdc)/*---------------------------------------------------------
 		graphics.DrawString(L"POZA BOXAMI", -1, &font, pointF, &solidBrush);
 		break;
 	default:
-		graphics.DrawString(L"COS SIE ZJEBALO", -1, &font, pointF, &solidBrush);
+		graphics.DrawString(L"COS SIE POPSULO", -1, &font, pointF, &solidBrush);
 		break;
 	}
 
@@ -246,8 +329,24 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 		wsk_rx[i]= &rx[i];
 		wsk_ry[i]= &ry[i];
 		waga[i]= rand()% 4;
+		sortBoxByWeight[i]= i;
 	}
 
+	for(int n=2; n>=0; n--)
+	{
+		for(int i= 0; i<=n; i++)
+		{
+			if(waga[sortBoxByWeight[i]]< waga[sortBoxByWeight[i+1]])
+			{
+				int container;
+				container= sortBoxByWeight[i+1];
+				sortBoxByWeight[i+1]= sortBoxByWeight[i];
+				sortBoxByWeight[i]= container;
+			}
+		}
+	}
+
+	stage= 1;
 	horizontalRail= LOWLEVEL -120;
 	value= 10;
 	degrees1= 170.0;
