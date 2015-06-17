@@ -26,7 +26,7 @@ TCHAR szTitle[MAX_LOADSTRING];					// The title bar text
 TCHAR szWindowClass[MAX_LOADSTRING];			// the main window class name
 
 INT value;
-
+RECT drawArea1 = { 0, 0, 600, 400 };
 //buttons
 HWND hwndButton;
 /*----------------------------------------------------DEFINICJE ZMIENNYCH---------------------------------------*/
@@ -44,7 +44,7 @@ int waga[4];
 float degrees1;
 float degrees2;
 int sortBoxByWeight[4];
-
+bool autoMode;
 // Forward declarations of functions included in this code module:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
 BOOL				InitInstance(HINSTANCE, int);
@@ -176,86 +176,85 @@ void OnPaint(HDC hdc)/*---------------------------------------------------------
 		//rx[i]=400+ i*(BOX_WIDE+10);
 		//ry[i]=LOWLEVEL - BOX_HIGH
 		//sortBoxByWeight[i]
-
-	switch(stage)   //-------------------------------------------------------------------PRACA AUTOMATYCZNA----------------*/
-	{
-		case 1:
-			HorizontalShifting(	rx[sortBoxByWeight[0]]+zabezpieczenie, 1);
-			break;
-		case 2:
-			DownShifting(ry[sortBoxByWeight[0]]+zabezpieczenie, rx[sortBoxByWeight[0]]+zabezpieczenie);
-			break;
-		case 3:
-			Catch();
-			break;
-		case 4:
-			HorizontalShifting(	180+zabezpieczenie, -1);
-			break;
-		case 5:
-			DownShifting(LOWLEVEL-55, 180+zabezpieczenie);
-			break;
-		case 6: PutDown();
-			break;
-		case 7:	
-			HorizontalShifting(	rx[sortBoxByWeight[1]]+zabezpieczenie, 1);
-			break;
-		case 8: 
-			DownShifting(ry[sortBoxByWeight[1]]+zabezpieczenie, rx[sortBoxByWeight[1]]+zabezpieczenie);
-			break;
-		case 9:
-			Catch();
-			break;
-		case 10:
-			HorizontalShifting(	220+zabezpieczenie, -1);
-			break;
-		case 11:
-			DownShifting(LOWLEVEL-55, 220+zabezpieczenie);
-			break;
-		case 12:
-			PutDown();
-			break;
-		case 13:
-			HorizontalShifting(	rx[sortBoxByWeight[2]]+zabezpieczenie, 1);
-			break;
-		case 14:
-			DownShifting(ry[sortBoxByWeight[2]]+zabezpieczenie, rx[sortBoxByWeight[2]]+zabezpieczenie);
-			break;
-		case 15:
-			Catch();
-			break;
-		case 16:
-			HorizontalShifting(	260+zabezpieczenie, -1);
-			break;
-		case 17:
-			DownShifting(LOWLEVEL-55, 260+zabezpieczenie);
-			break;
-		case 18:
-			PutDown();
-			break;
-		case 19:
-			HorizontalShifting(	rx[sortBoxByWeight[3]]+zabezpieczenie, 1);
-			break;
-		case 20:
-			DownShifting(ry[sortBoxByWeight[3]]+zabezpieczenie, rx[sortBoxByWeight[3]]+zabezpieczenie);
-			break;
-		case 21:
-			Catch();
-			break;
-		case 22:
-			HorizontalShifting(	300+zabezpieczenie, -1);
-			break;
-		case 23:
-			DownShifting(LOWLEVEL-55, 300+zabezpieczenie);
-			break;
-		case 24:
-			PutDown();
-			break;
-		case 25:
-			HorizontalShifting(	400, 1);
-		default:
-			break;
-
-	}
+	if(autoMode)
+		switch(stage)   //-------------------------------------------------------------------PRACA AUTOMATYCZNA----------------*/
+		{
+			case 1:
+				HorizontalShifting(	rx[sortBoxByWeight[0]]+zabezpieczenie, 1);
+				break;
+			case 2:
+				DownShifting(ry[sortBoxByWeight[0]]+zabezpieczenie, rx[sortBoxByWeight[0]]+zabezpieczenie);
+				break;
+			case 3:
+				Catch();
+				break;
+			case 4:
+				HorizontalShifting(	180+zabezpieczenie, -1);
+				break;
+			case 5:
+				DownShifting(LOWLEVEL-55, 180+zabezpieczenie);
+				break;
+			case 6: PutDown();
+				break;
+			case 7:	
+				HorizontalShifting(	rx[sortBoxByWeight[1]]+zabezpieczenie, 1);
+				break;
+			case 8: 
+				DownShifting(ry[sortBoxByWeight[1]]+zabezpieczenie, rx[sortBoxByWeight[1]]+zabezpieczenie);
+				break;
+			case 9:
+				Catch();
+				break;
+			case 10:
+				HorizontalShifting(	220+zabezpieczenie, -1);
+				break;
+			case 11:
+				DownShifting(LOWLEVEL-55, 220+zabezpieczenie);
+				break;
+			case 12:
+				PutDown();
+				break;
+			case 13:
+				HorizontalShifting(	rx[sortBoxByWeight[2]]+zabezpieczenie, 1);
+				break;
+			case 14:
+				DownShifting(ry[sortBoxByWeight[2]]+zabezpieczenie, rx[sortBoxByWeight[2]]+zabezpieczenie);
+				break;
+			case 15:
+				Catch();
+				break;
+			case 16:
+				HorizontalShifting(	260+zabezpieczenie, -1);
+				break;
+			case 17:
+				DownShifting(LOWLEVEL-55, 260+zabezpieczenie);
+				break;
+			case 18:
+				PutDown();
+				break;
+			case 19:
+				HorizontalShifting(	rx[sortBoxByWeight[3]]+zabezpieczenie, 1);
+				break;
+			case 20:
+				DownShifting(ry[sortBoxByWeight[3]]+zabezpieczenie, rx[sortBoxByWeight[3]]+zabezpieczenie);
+				break;
+			case 21:
+				Catch();
+				break;
+			case 22:
+				HorizontalShifting(	300+zabezpieczenie, -1);
+				break;
+			case 23:
+				DownShifting(LOWLEVEL-55, 300+zabezpieczenie);
+				break;
+			case 24:
+				PutDown();
+				break;
+			case 25:
+				HorizontalShifting(	400, 1);
+			default:
+				break;
+		}
 	
 
 	FontFamily  fontFamily(L"Times New Roman");
@@ -347,6 +346,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 		}
 	}
 
+	autoMode= false;
 	stage= 1;
 	horizontalRail= LOWLEVEL -120;
 	value= 10;
@@ -502,6 +502,14 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 		(HMENU)ID_BUTTON_PUT_DOWN,                   // the ID of your button
 		hInstance,                            // the instance of your application
 		NULL);                               // extra bits you dont really need
+//AUTO MODE
+	hwndButton = CreateWindow(TEXT("button"), TEXT("AUTO"),
+		WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON,
+		600, 250, 100, 30, hWnd, (HMENU)ID_RBUTTON1, GetModuleHandle(NULL), NULL);
+//MANUAL MODE
+	hwndButton = CreateWindow(TEXT("button"), TEXT("MANUAL"),
+		WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON,
+		600, 280, 100, 30, hWnd, (HMENU)ID_RBUTTON2, GetModuleHandle(NULL), NULL);
 
    if (!hWnd)
    {
@@ -568,6 +576,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			wsk_rx[which_one]= &rx[which_one];
 			wsk_ry[which_one]= &ry[which_one];
 			break;
+		case ID_RBUTTON1:
+			autoMode= true;
+			break;
+		case ID_RBUTTON2:
+			autoMode= false;
+			break;
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);
 		}
@@ -587,7 +601,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 			case TMR_1:
 				//force window to repaint
-				InvalidateRect(hWnd, NULL, TRUE);
+				InvalidateRect(hWnd, &drawArea1 , TRUE);
 				hdc = BeginPaint(hWnd, &ps);
 				OnPaint(hdc);
 				EndPaint(hWnd, &ps);
