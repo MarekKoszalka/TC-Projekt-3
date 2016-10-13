@@ -1,2 +1,2 @@
 # TC-Projekt-3
-Techniki Programowania. Prokekt 3: Wizualizacja systemów automatyki
+Techniki Programowania. Projekt 3: Wizualizacja systemów automatyki
